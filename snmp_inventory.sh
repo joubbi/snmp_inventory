@@ -62,6 +62,15 @@ do
         echo "$sysObjectID" | /bin/grep '.8691.' > /dev/null 
         if [[ $? == 0 ]]; then
           model="Moxa"
+        else
+          $SNMPOPT $LINE .1.3.6.1.2.1.1.1.0 > /dev/null 2>&1
+          if [[ $? == 0 ]]; then
+            sysDescr=`$SNMPOPT $LINE .1.3.6.1.2.1.1.1.0`
+            echo "$sysDescr" | /bin/grep 'Siemens' > /dev/null
+            if [[ $? == 0 ]]; then
+              model="Siemens"
+            fi
+          fi
         fi
       fi
     fi
