@@ -111,7 +111,7 @@ do
     hostname="N/A"
   fi
 
-echo "$LINE" = "$hostname", "$model", "$location", "$contact", "$mac", "$serial"
+echo "$LINE", "$hostname", "$model", "$location", "$contact", "$mac", "$serial"
 done < $1
 
 
