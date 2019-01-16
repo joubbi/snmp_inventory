@@ -78,8 +78,19 @@ do
     # HP specific stuff
     echo "$model" | /bin/grep 'HP' > /dev/null
     if [ $? == 0 ]; then
-      serial=`$SNMPOPT $LINE .1.3.6.1.2.1.43.5.1.1.17.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
-      mac=`$SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+      $SNMPOPT $LINE .1.3.6.1.2.1.43.5.1.1.17.1 > /dev/null 2>&1
+      if [[ $? == 0 ]]; then
+        serial=`$SNMPOPT $LINE .1.3.6.1.2.1.43.5.1.1.17.1 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+      fi
+      $SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.2 > /dev/null 2>&1
+      if [[ $? == 0 ]]; then
+        mac=`$SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+      else
+        $SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.3 > /dev/null 2>&1
+        if [[ $? == 0 ]]; then
+          mac=`$SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.3 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
+        fi
+      fi
     fi
 
     # Zebra specific stuff
