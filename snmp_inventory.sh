@@ -65,10 +65,14 @@ do
         else
           $SNMPOPT $LINE .1.3.6.1.2.1.1.1.0 > /dev/null 2>&1
           if [[ $? == 0 ]]; then
-            sysDescr=`$SNMPOPT $LINE .1.3.6.1.2.1.1.1.0`
+            sysDescr=`$SNMPOPT $LINE .1.3.6.1.2.1.1.1.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
             echo "$sysDescr" | /bin/grep 'Siemens' > /dev/null
             if [[ $? == 0 ]]; then
               model="Siemens"
+            fi
+            echo "$sysDescr" | /bin/grep 'SCALANCE' > /dev/null
+            if [[ $? == 0 ]]; then
+              model="$sysDescr"
             fi
           fi
         fi
