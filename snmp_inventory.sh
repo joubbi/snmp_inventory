@@ -1,14 +1,15 @@
 #!/bin/sh
 ###############################################################################
 #                                                                             #
-# A script for checking info about printers with SNMP                         #
-# Written by Farid Joubbi 2014-10-02                                          #
+# A script for presenting information about SNMP enabled devices.             #
+# The script takes a file as input with host addresses                        #
+# and scans those hosts with SNMP.                                            #
 #                                                                             #
 # USAGE:                                                                      #
 # ./printer_info FILENAME                                                     #
 # FILENAME is a file containing one hostname per row.                         #
-#
-# Version 2.0 2019-01-16 Renamed file to snmp_inventory                                                                             #
+#                                                                             #
+# Version 2.0 2019-01-16 Renamed file to snmp_inventory and a big rewrite     #
 # Version 1.0 2014-10-02 Initial release named printer_info.sh                #
 #                                                                             #
 # Licensed under the Apache License Version 2.0                               #
@@ -43,10 +44,8 @@ do
 
 
   # Check if device answers and get general mandatory variables
-  #hostname=`$SNMPOPT $LINE .1.3.6.1.2.1.1.5.0 > /dev/null 2>&1`
   $SNMPOPT $LINE .1.3.6.1.2.1.1.5.0 > /dev/null 2>&1
   if [[ $? == 0 ]]; then
-#    hostname=`echo $hostname | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'` 
     hostname=`$SNMPOPT $LINE .1.3.6.1.2.1.1.5.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
     contact=`$SNMPOPT $LINE .1.3.6.1.2.1.1.4.0 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
     location=`$SNMPOPT $LINE .1.3.6.1.2.1.1.6.0 | /bin/sed -e 's/\STRING: //g' | tr '[<>]' '_'`
@@ -79,6 +78,7 @@ do
       fi
     fi
 
+
     # HP specific stuff
     echo "$model" | /bin/grep 'HP' > /dev/null
     if [ $? == 0 ]; then
@@ -97,6 +97,7 @@ do
       fi
     fi
 
+
     # Zebra specific stuff
     echo "$model" | /bin/grep 'Zebra' > /dev/null
     if [ $? == 0 ]; then
@@ -107,7 +108,6 @@ do
         mac=`$SNMPOPT $LINE .1.3.6.1.2.1.2.2.1.6.2 | /bin/sed -e 's/\STRING: //g' | /bin/sed -e 's/\"//g' | tr '[<>]' '_'`
       fi
     fi
-
 
 
     # Canon specific stuff
@@ -121,12 +121,11 @@ do
     fi
 
 
-
   else
     hostname="N/A"
   fi
 
+
 echo "$LINE", "$hostname", "$model", "$location", "$contact", "$mac", "$serial"
 done < $1
-
 
